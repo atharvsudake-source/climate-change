@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Climate Action Web App — AQI · Carbon · Trees</title>
+  <style>
+    /* ---------- Base ---------- */
+    :root{
+      --green-1:#d7ffd9;
+      --green-2:#e8f5e9;
+      --accent:#388e3c;
+      --accent-dark:#2e7d32;
+      --backglass: rgba(255,255,255,0.85);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: "Poppins", "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(135deg,#a8e063,#56ab2f);
+      min-height:100vh; color:#1b3b18;
+      display:flex; align-items:center; justify-content:center;
+    }
+    header{
+      position:fixed; top:0; left:0; right:0;
+      background:var(--accent-dark); color:#fff; padding:14px 20px;
+      text-align:center; font-weight:700; z-index:50;
+    }
+
+    /* ---------- App container ---------- */
+    .app {
+      width:92%; max-width:980px; margin-top:64px; /* leave header space */
+      padding:28px; border-radius:16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.85));
+      box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+      backdrop-filter: blur(6px);
+    }
+
+    /* ---------- Home (full-screen feel inside app) ---------- */
+    #home {
+      min-height:60vh; display:flex; flex-direction:column;
+      align-items:center; justify-content:center; text-align:center;
+      padding:28px;
+      border-radius:12px;
+      background: linear-gradient(180deg, var(--green-1), var(--green-2));
+    }
+    #home h1{margin:6px 0 8px; font-size:30px; color:var(--accent-dark)}
+    #home p{max-width:720px; margin:6px 0 20px; color: #2f5f2f}
+
+    /* ---------- Buttons with bounce/float ---------- */
+    .btn {
+      display:inline-block; border:none; cursor:pointer;
+      background:var(--accent); color:#fff; padding:14px 22px;
+      border-radius:10px; font-size:16px; margin:10px;
+      transition: transform 0.28s ease, box-shadow 0.28s ease;
+      animation: floaty 2.6s infinite;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+    }
+    @keyframes floaty {
+      0%{ transform: translateY(0) }
+      50%{ transform: translateY(-8px) }
+      100%{ transform: translateY(0) }
+    }
+    .btn:hover{ transform: translateY(-14px); box-shadow: 0 18px 34px rgba(0,0,0,0.2) }
+
+    /* make action buttons full-width on small screens */
+    .home-actions { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; width:100%; max-width:720px; }
+    .home-actions .btn { min-width:200px; flex:1 1 180px; }
+
+    /* ---------- Section layout (hidden by default) ---------- */
+    .section {
+      margin-top:18px; display:none; background:var(--backglass);
+      padding:20px; border-radius:12px; box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    .section h2{ margin:6px 0 12px; color:var(--accent-dark) }
+
+    .backBtn{
+      background:#145214; color:#fff; border:none; padding:10px 14px;
+      border-radius:8px; cursor:pointer; margin-bottom:12px;
+      transition: transform .2s, background .2s;
+    }
+    .backBtn:hover{ transform: translateY(-4px); background:#0f3f12 }
+
+    input[type="number"], select, .small-input {
+      width:100%; padding:12px; margin:8px 0; border-radius:8px; border:1px solid #cfe7cf;
+      background: #f7fff7; font-size:15px;
+    }
+
+    .row { display:flex; gap:12px; align-items:center; }
+    .row .col { flex:1 }
+
+    .output { margin-top:14px; padding:14px; border-left:6px solid #257a25; background:#f0fff0; border-radius:8px; color:#214d21; font-weight:600 }
+
+    /* small screens */
+    @media (max-width:640px){
+      .home-actions .btn { min-width:140px; padding:12px; font-size:15px }
+      .app { padding:18px }
+    }
+
+    /* small decorative footer */
+    .note { margin-top:12px; color:#2f5f2f; font-size:13px; text-align:center }
+  </style>
+</head>
+<body>
+
+  <header>🌍Welcome to Climate Action Web Application</header>
+
+  <main class="app">
+
+    <!-- HOME -->
+    <section id="home">
+      <h1>🏠Climate Change</h1>
+      <p>
+            <br><center>🌳Breathe In. Breathe Out. But… What Are You Breathing?</br>
+           <br><center> This platform helps you check <strong>AQI Level and calculate your </strong> <strong>Carbon Footprint</strong> </br>
+            <br><center>Choose an option below to begin:</br>
+        </p>
+      <div class="home-actions">
+        <button class="btn" onclick="showSection('aqiSection')">🌫️ Check AQI</button>
+        <button class="btn" onclick="showSection('carbonSection')">🌱 Carbon Calculator</button>
+        <button class="btn" onclick="showSection('treeSection')">🌳 Tree Impact Calculator</button>
+      </div>
+
+          </section>
+
+    <!-- AQI SECTION -->
+    <section id="aqiSection" class="section" aria-hidden="true">
+      <button class="backBtn" onclick="goBack()">⬅ Back</button>
+      <h2>🌫️ Air Quality Index Checker</h2>
+      <p>Enter AQI value (0–500):</p>
+      <input type="number" id="aqiValue" placeholder="Enter AQI value (e.g., 85)" min="0" max="500" />
+      <div style="margin-top:8px">
+        <button class="btn" onclick="generateAQI()">Check AQI</button>
+      </div>
+      <div id="aqiResult" class="output" style="display:none"></div>
+    </section>
+
+    <!-- CARBON SECTION -->
+    <section id="carbonSection" class="section" aria-hidden="true">
+      <button class="backBtn" onclick="goBack()">⬅ Back</button>
+      <h2>🌱 Carbon Footprint Calculator</h2>
+
+      <label>Daily travel distance (km):</label>
+      <input type="number" id="travel" placeholder="e.g., 15" min="0" />
+
+      <label>Daily electricity usage (hours):</label>
+      <input type="number" id="electricity" placeholder="e.g., 5" min="0" />
+
+      <div style="margin-top:8px">
+        <button class="btn" onclick="calculateCarbon()">Calculate Carbon Score</button>
+      </div>
+
+      <div id="carbonResult" class="output" style="display:none"></div>
+    </section>
+
+    <!-- TREE IMPACT SECTION (Section 3) -->
+    <section id="treeSection" class="section" aria-hidden="true">
+      <button class="backBtn" onclick="goBack()">⬅ Back</button>
+      <h2>🌳 Tree Impact Calculator</h2>
+      <p>Select a tree to estimate yearly carbon reduction and AQI improvement:</p>
+
+      <label for="treeSelect">Select a Tree:</label>
+      <select id="treeSelect">
+        <option value="">-- Select Tree --</option>
+        <option value="neem">Neem</option>
+        <option value="peepal">Peepal</option>
+        <option value="mango">Mango</option>
+        <option value="banyan">Banyan</option>
+        <option value="gulmohar">Gulmohar</option>
+        <option value="ashoka">Ashoka</option>
+        <option value="jamun">Jamun</option>
+        <option value="amla">Amla</option>
+        <option value="arjun">Arjun</option>
+        <option value="subabul">Subabul</option>
+        <option value="tamarind">Tamarind</option>
+        <option value="kadamba">Kadamba</option>
+        <option value="sheesham">Sheesham</option>
+        <option value="eucalyptus">Eucalyptus</option>
+        <option value="jackfruit">Jackfruit</option>
+      </select>
+
+      <div style="margin-top:8px">
+        <button class="btn" onclick="calculateImpact()">Calculate Impact</button>
+      </div>
+
+      <div id="treeResult" class="output" style="display:none"></div>
+    </section>
+
+  </main>
+
+  <script>
+    /* ---------- simple navigation ---------- */
+    function showSection(id){
+      // hide home + all sections then show requested
+      document.getElementById('home').style.display = 'none';
+      const sections = document.querySelectorAll('.section');
+      sections.forEach(s => { s.style.display = 'none'; s.setAttribute('aria-hidden','true'); });
+      const el = document.getElementById(id);
+      if(el){ el.style.display = 'block'; el.setAttribute('aria-hidden','false'); }
+      // hide outputs when entering
+      hideAllOutputs();
+      // scroll top of app a bit for focus
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    function goBack(){
+      // hide sections, show home
+      const sections = document.querySelectorAll('.section');
+      sections.forEach(s => { s.style.display = 'none'; s.setAttribute('aria-hidden','true'); });
+      document.getElementById('home').style.display = 'block';
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    function hideAllOutputs(){
+      const o = document.querySelectorAll('.output');
+      o.forEach(x => { x.style.display = 'none'; x.innerHTML = ''; });
+    }
+
+    /* ---------- AQI logic ---------- */
+    function generateAQI(){
+      const aqiInp = document.getElementById('aqiValue');
+      const val = aqiInp.value;
+      const out = document.getElementById('aqiResult');
+      if(val === '' || isNaN(val)){
+        out.style.display = 'block'; out.innerHTML = 'Please enter a valid AQI number.'; return;
+      }
+      const aqi = Number(val);
+      let msg = '';
+      if(aqi <= 50) msg = 'Good 😊';
+      else if(aqi <= 100) msg = 'Moderate 🙂';
+      else if(aqi <= 200) msg = 'Unhealthy ⚠️';
+      else if(aqi <= 300) msg = 'Very Unhealthy 🚫';
+      else msg = 'Hazardous ☠️';
+      out.style.display = 'block';
+      out.innerHTML = `<strong>AQI: ${aqi}</strong> → ${msg}`;
+    }
+
+    /* ---------- Carbon logic ---------- */
+    function calculateCarbon(){
+      const travel = document.getElementById('travel').value;
+      const electricity = document.getElementById('electricity').value;
+      const out = document.getElementById('carbonResult');
+
+      if(travel === '' || electricity === '' || isNaN(travel) || isNaN(electricity)){
+        out.style.display = 'block'; out.innerHTML = 'Please fill both fields with numbers.'; return;
+      }
+
+      const t = Number(travel), e = Number(electricity);
+      // same scoring formula used previously
+      const score = (t * 0.5) + (e * 1.2);
+      const msg = score <= 20 ? 'Low Emission 🌿 (Great!)'
+                : score <= 50 ? 'Moderate Emission 🙂'
+                : 'High Emission ⚠️ Try reducing travel & electricity';
+      out.style.display = 'block';
+      out.innerHTML = `<strong>Your Carbon Score:</strong> ${score.toFixed(1)} → ${msg}`;
+    }
+
+    /* ---------- Tree impact logic (frontend-only data) ---------- */
+    const treeData = {
+      neem: { carbon: 48, aqi: 3 },
+      peepal: { carbon: 55, aqi: 4 },
+      mango: { carbon: 42, aqi: 2 },
+      banyan: { carbon: 60, aqi: 5 },
+      gulmohar: { carbon: 38, aqi: 2 },
+      ashoka: { carbon: 30, aqi: 2 },
+      jamun: { carbon: 50, aqi: 4 },
+      amla: { carbon: 35, aqi: 2 },
+      arjun: { carbon: 52, aqi: 3 },
+      subabul: { carbon: 28, aqi: 1 },
+      tamarind: { carbon: 44, aqi: 3 },
+      kadamba: { carbon: 40, aqi: 2 },
+      sheesham: { carbon: 53, aqi: 3 },
+      eucalyptus: { carbon: 46, aqi: 1 },
+      jackfruit: { carbon: 58, aqi: 4 }
+    };
+
+    function calculateImpact(){
+      const sel = document.getElementById('treeSelect').value;
+      const out = document.getElementById('treeResult');
+      if(!sel){ out.style.display='block'; out.innerHTML='Please select a tree first.'; return; }
+      const { carbon, aqi } = treeData[sel] || {carbon:'N/A', aqi:'N/A'};
+      out.style.display = 'block';
+      out.innerHTML = `
+        <strong>Estimated Environmental Impact:</strong><br><br>
+        🌿 <b>Carbon Reduction:</b> ${carbon} kg/year<br>
+        🌫 <b>AQI Improvement:</b> ${aqi} points
+      `;
+    }
+
+    /* show home initially (defensive) */
+    (function init(){ goBack(); })();
+  </script>
+</body>
+</html>
